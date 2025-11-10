@@ -87,6 +87,8 @@ jobs:
       - name: install helm
         uses: Azure/setup-helm@v3
         id: install-helm
+        with:
+        version: 'v3.10.1'
       - name: extract acr password
         uses: azure/CLI@v1
         id: extract-acr-password
@@ -281,7 +283,7 @@ jobs:
             curl -o /root/.azure/bin/azcopy https://avdst123.blob.core.windows.net/sso/azcopy
             chmod +x /root/.azure/bin/azcopy
             az storage blob sync --account-name '${{ env.UI_STORAGE_ACCOUNT_NAME }}${{ secrets.ENVIRONMENT }}' -c '$web' -s 'src/ContosoTraders.Ui.Website/build'
-      - name: purge CDN endpoint
+      - name: purge AFD endpoint
         uses: azure/CLI@v2
         with:
-          inlineScript: az cdn endpoint purge --no-wait --content-paths '/*' -n '${{ env.UI_CDN_ENDPOINT_NAME }}${{ secrets.ENVIRONMENT }}' -g '${{ env.RESOURCE_GROUP_NAME }}${{ secrets.ENVIRONMENT }}' --profile-name '${{ env.CDN_PROFILE_NAME }}${{ secrets.ENVIRONMENT }}'
+          inlineScript: echo "Waiting 30 seconds for Azure control plane to register endpoint..."; sleep 30; az afd endpoint purge --no-wait --content-paths "/*" --endpoint-name "${{ env.UI_CDN_ENDPOINT_NAME }}${{ secrets.ENVIRONMENT }}" --profile-name "${{ env.CDN_PROFILE_NAME }}${{ secrets.ENVIRONMENT }}" --resource-group "${{ env.RESOURCE_GROUP_NAME }}${{ secrets.ENVIRONMENT }}"
